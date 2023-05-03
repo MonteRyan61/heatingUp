@@ -4,9 +4,10 @@ let borders = [];
 let sun, ship, heatGuage;
 let lborder,bborder,rborder;
 let gameState = 'start';
-let maxAsteroids = 15;
+let maxAsteroids = 20;
 let c = '#F2C77D';
-let guage, bg, r, myFont, thrusterSound, alarmSound;
+let guage, bg, r, myFont,ct;
+let thrusterSound, alarmSound;
 
 const plScale = 60;
 const scaleFrom = (x, y, tileSize = 1) =>
@@ -17,18 +18,15 @@ const scaleTo = (x, y, tileSize = 1) =>
 function preload(){
   alarmSound = loadSound('sounds/alarm.flac')
   thrusterSound = loadSound('sounds/rocketEngine.wav');
-  guage = loadImage('img/AsteroidsGuage.png');
-  bg = loadImage('img/AsteroidsBG.png');
-  r = loadImage('img/Asteroids3.png');
+  guage = loadImage('img/Astro-InverterGg4.png');
+  bg = loadImage('img/Astro-InverterBG.png');
+  r = loadImage('img/Astro-InverterR.png');
+  ct = loadImage('img/Astro-InverterCT.png');
   myFont = loadFont('img/Bruno.ttf');
 }
 
 function setup() {
-  
-  var cnv = createCanvas(700, 500);
-  var x = (windowWidth - width) / 2;
-  var y = (windowHeight - height) / 2;
-  cnv.position(x, y);
+  createCanvas(700, 500);
   textFont(myFont);
   shapes[0] = [[-12,37],[0,37],[11,30],[11,25],[0,22],[11,15],[4,8],[-1,11],[-12,8],[-20,18],[-20,30],[-8,30],[-12,37]];
   shapes[1] = [[-78,50],[-68,45],[-57,51],[-46,40],[-56,34],[-47,25],[-57,10],[-72,16],[-78,10],[-90,20],[-83,30],[-89,40],[-78,50]];
@@ -63,13 +61,13 @@ function makeShip(){
   noStroke();
   let x1 = -13;
   let y1 = -42;
-  let x2 = 7;
+  let x2 = 5;
   let y2 = -48;
   let x3 = -13;
   let y3 = -54;
   ship = new Sprite([[x1, y1], [x2, y2], [x3, y3],[x1,y1]]);
-  ship.rotationDrag = 10; //CHANGED ROTATION DRAG FROM 0.5 Otherwise was causing bad rotation animation
-  ship.drag = 2; //CHANGED SHIP DRAG FROM 1
+  ship.rotationDrag = 0.5;
+  ship.drag = 1;
   ship.x = width / 2;
   ship.y = height / 2;
   ship.heat = 0;
@@ -77,13 +75,6 @@ function makeShip(){
   ship.collider = 'd';
   ship.name = 'ship';
   ship.score = 0;
-}
-
-function playThrusterSound() {
-  thrusterSound.play();
-}
-function unloadSound() {
-  thrusterSound.unload();
 }
 
 function moveShip(){
@@ -106,7 +97,7 @@ function moveShip(){
   }
   if (ship.y < 0){
     //ACCELERATION
-    ship.y = 0.05; //CHANGED SPEED FROM 0.15
+    ship.y = 0.05;
   }
 }
 
@@ -167,15 +158,9 @@ function updateGame(){
   rect(width-100,0,100,height);
   fill(41,41,40);
   text("Score: " + round(ship.score), width-95, 15);
-  if(ship.heat > 80){
-    fill(210,86,62);
-  } else if(ship.heat > 45){
-    fill(230,133,75);
-  } else {
-    fill(238,182,84);
-  }
-  rect(26,450,45,-ship.heat*4.1);
-  image(guage,10,20,85,450);
+  fill(245,137,58)
+  rect(6,455,75,-ship.heat*4.1);
+  image(guage,2,20,95,450);
   pop();
 }
 
@@ -189,10 +174,10 @@ function makeAsteroids(){
   asteroid.color = "#EBEBD3"
   asteroids.push(asteroid);
   for(let i = asteroids.length; i < maxAsteroids; i++){
-    let asteroid = new Sprite(shapes[round(random(2))]);
+    let asteroid = new Sprite(shapes[round(random(1))]);
     asteroid.x = random(100,width-100);
     asteroid.y = random(100,width-100);
-    asteroid.vel.x = random(-1,1); //CAN MAKE EASIER HERE ASWELL
+    asteroid.vel.x = random(-1,1);
     asteroid.vel.y = random(-1,1);
     asteroid.collider = 'k';
     asteroid.rotation = random(360);
@@ -202,7 +187,7 @@ function makeAsteroids(){
 }
 
 function newAsteroid(index){
-  let asteroid = new Sprite(shapes[round(random(2))]);
+  let asteroid = new Sprite(shapes[round(random(1))]);
   let pl = round(random(2))
   if(pl == 0){
     asteroid.x = 0;
@@ -231,6 +216,13 @@ function draw(){
     fill(255,255,255);
     image(bg,0,0,width,height);    
     if (kb.presses('x')) {
+	  gameState = 'control';
+    }
+  } else if(gameState == 'control'){
+    background(41,41,40);
+    fill(255,255,255);
+    image(ct,0,0,width,height);    
+    if (kb.presses('x')) {
       newGame();
 	  gameState = 'play';
     }
@@ -238,7 +230,6 @@ function draw(){
     background(41,41,40);
     rayCast();
     moveShip();
-    updateGame();
     for(let i = 0; i < asteroids.length; i++){
       if(asteroids[i].x < 0 - asteroids[i].width || asteroids[i].x > width + asteroids[i].width || asteroids[i].y > height + asteroids[i].height){
         asteroids[i].remove();
@@ -248,6 +239,7 @@ function draw(){
     if(asteroids.length < maxAsteroids){
       newAsteroid();
     }
+    updateGame();
   } else if(gameState == 'end'){
     thrusterSound.stop();
     alarmSound.stop();
@@ -256,7 +248,8 @@ function draw(){
     fill(235,235,211);
     image(r,0,0,width,height);
     fill(235,235,211);
-    text("Score: " + round(ship.score), width/2-20, 350);
+    textSize(25);
+    text("Score: " + round(ship.score), width/2-60, 330);
     if (kb.presses('x')) {
       newGame();
 	  gameState = 'play';
