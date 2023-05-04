@@ -138,6 +138,7 @@ function rayCast(){
   if (hit){
     if(!alarmSound.isPlaying())
     {
+      alarmSound.setVolume(0.5); //want this slightly quiter than the thrusters
       alarmSound.play();
     }
     ship.heat += 0.2;
@@ -167,6 +168,7 @@ function updateGame(){
   rect(0,0,100,height);
   rect(width-100,0,100,height);
   fill(41,41,40);
+  textSize(14);
   text("Score: " + round(ship.score), width-95, 15);
   fill(245,137,58)
   rect(6,455,75,-ship.heat*4.1);
@@ -239,6 +241,7 @@ function draw(){
 	  gameState = 'play';
     }
   } else if(gameState == 'play'){
+    newHigh = false;
     background(41,41,40);
     rayCast();
     moveShip();
@@ -263,13 +266,13 @@ function draw(){
     textSize(25);
     if(newHigh)
     {
-      text("NEW HIGH SCORE SET!", width/2-60, 310);
+      text("NEW HIGH SCORE SET!", width/2 - textWidth("NEW HIGH SCORE SET!")/2, 350);
     }
-    text("Score: " + round(ship.score), width/2-60, 280);
-    text("High Score: " + round(highscore), width/2-60, 340);
+    text("Score: " + round(ship.score), width/2 - textWidth("Score: " + round(ship.score))/2, 290);
+    text("High Score: " + round(highscore), width/2 - textWidth("High Score: " + round(highscore))/2, 320);
     if (kb.presses('x')) {
       newGame();
-	  gameState = 'play';
+	    gameState = 'play';
     }
   }
 }
