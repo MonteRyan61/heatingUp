@@ -8,6 +8,8 @@ let maxAsteroids = 20;
 let c = '#F2C77D';
 let guage, bg, r, myFont,ct;
 let thrusterSound, alarmSound;
+let highscore = 0;
+let newHigh = false;
 
 const plScale = 60;
 const scaleFrom = (x, y, tileSize = 1) =>
@@ -26,7 +28,10 @@ function preload(){
 }
 
 function setup() {
-  createCanvas(700, 500);
+  var cnv = createCanvas(700, 500);
+  var x = (windowWidth - width) / 2;
+  var y = (windowHeight - height) / 2;
+  cnv.position(x, y);
   textFont(myFont);
   shapes[0] = [[-12,37],[0,37],[11,30],[11,25],[0,22],[11,15],[4,8],[-1,11],[-12,8],[-20,18],[-20,30],[-8,30],[-12,37]];
   shapes[1] = [[-78,50],[-68,45],[-57,51],[-46,40],[-56,34],[-47,25],[-57,10],[-72,16],[-78,10],[-90,20],[-83,30],[-89,40],[-78,50]];
@@ -66,7 +71,7 @@ function makeShip(){
   let x3 = -13;
   let y3 = -54;
   ship = new Sprite([[x1, y1], [x2, y2], [x3, y3],[x1,y1]]);
-  ship.rotationDrag = 0.5;
+  ship.rotationDrag = 3;
   ship.drag = 1;
   ship.x = width / 2;
   ship.y = height / 2;
@@ -151,6 +156,11 @@ function updateGame(){
   ship.score += 0.2;
   if(ship.heat > 100){
     gameState = 'end';
+    if(round(ship.score) > highscore)
+    {
+      newHigh = true;
+      highscore = round(ship.score);
+    }
   }
   push();
   fill(235,235,211);
@@ -212,6 +222,7 @@ function newAsteroid(index){
 
 function draw(){
   if(gameState == 'start'){
+    newHigh = false;
     background(41,41,40);
     fill(255,255,255);
     image(bg,0,0,width,height);    
@@ -219,6 +230,7 @@ function draw(){
 	  gameState = 'control';
     }
   } else if(gameState == 'control'){
+    newHigh = false;
     background(41,41,40);
     fill(255,255,255);
     image(ct,0,0,width,height);    
@@ -249,7 +261,12 @@ function draw(){
     image(r,0,0,width,height);
     fill(235,235,211);
     textSize(25);
-    text("Score: " + round(ship.score), width/2-60, 330);
+    if(newHigh)
+    {
+      text("NEW HIGH SCORE SET!", width/2-60, 310);
+    }
+    text("Score: " + round(ship.score), width/2-60, 280);
+    text("High Score: " + round(highscore), width/2-60, 340);
     if (kb.presses('x')) {
       newGame();
 	  gameState = 'play';
